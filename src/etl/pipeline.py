@@ -1,4 +1,5 @@
 import pandas as pd
+import gc
 from src.config import dir_config
 from src.db.init_db import run_schema_init
 from src.etl.cleaner import DataCleaner
@@ -28,6 +29,10 @@ class DataPipeline:
 
             logger.info(f"PIPELINE SUCCESSFUL! All relations are strictly maintained.")
 
+            del cleaner
+            del db_manager
+            gc.collect()
+            logger.info("Garbage collection triggered. RAM freed successfully.")
         except Exception as e:
             logger.error(f"Pipeline Fail: {e}")
             raise
