@@ -8,6 +8,7 @@ import shutil
 
 logger = setup_log(name="Pull_data", filename="data")
 
+
 class Data_Collection:
     @auto_logger(logger)
     def Collection(self):
@@ -55,6 +56,3 @@ class Data_Collection:
         finally:
             pass
 
-if __name__ == "__main__":
-    data= Data_Collection()
-    data.Collection()
