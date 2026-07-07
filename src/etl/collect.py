@@ -1,3 +1,5 @@
+import os
+
 import kagglehub as kg
 from pathlib import Path
 import pandas as pd
@@ -5,6 +7,8 @@ from src.config import dir_config
 from src.config.logs_config import setup_log, auto_logger
 import stat
 import shutil
+
+from src.utils.file_helpers import conversion_file
 
 logger = setup_log(name="Pull_data", filename="data")
 
@@ -28,31 +32,16 @@ class Data_Collection:
                 if target.exists():
                     target.chmod(target.stat().st_mode | stat.S_IWRITE)
 
-                logger.info(f"Drop trash column from {csv_file.name}")
+                shutil.copy(csv_file, target)
 
-                chunk_size = 100000
-                first_chunk = True
+                logger.info("Starting conversion .csv to .parquet")
 
-                for chunk in pd.read_csv(csv_file, chunksize=chunk_size):
-                    cols_to_drop = [
-                        col for col in chunk.columns if col.lower() == "isflaggedfraud"
-                    ]
-                    if cols_to_drop:
-                        chunk.drop(columns=cols_to_drop, inplace=True)
+                output = conversion_file(target, Path_Install / "Data.parquet")
 
-                    chunk.to_csv(
-                        target,
-                        mode="w" if first_chunk else "a",
-                        header=first_chunk,
-                        index=False,
-                    )
-                    first_chunk = False
-
-                logger.info(f"Save file add {target}")
-                target.chmod(target.stat().st_mode | stat.S_IWRITE)
+                logger.info(f"Save file add {output}")
+                os.remove(target)
 
         except Exception as e:
             logger.error(f"Error : {e}")
         finally:
             pass
-
